@@ -1,26 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { ReactElement } from 'react';
+import { QueryClient, QueryClientProvider, useQuery } from 'react-query';
+ 
+const queryClient = new QueryClient()
 
-function App() {
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <QueryClientProvider client={queryClient}>
+      <Example />
+    </QueryClientProvider>
+  )
 }
 
-export default App;
+const Example = (): ReactElement<any,any> => {
+  const { isLoading, error, data } = useQuery('aa', () =>
+    fetch('https://api.github.com/repos/tannerlinsley/react-query').then(res =>
+      res.json()
+    )
+  )
+
+  if (isLoading) return <span>'Loading...'</span>
+
+  if (error) return <>'An error has occurred: ' + error.message</>
+
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.description}</p>
+      <strong>👀 {data.subscribers_count}</strong>{' '}
+      <strong>✨ {data.stargazers_count}</strong>{' '}
+      <strong>🍴 {data.forks_count}</strong>
+    </div>
+  )
+}
